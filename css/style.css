@@ -1,0 +1,17 @@
+body {
+    text-align: center;
+}
+
+canvas {
+    display: block;
+    margin: 1rem auto;
+    border: 2px solid black;
+}
+
+#stop {
+    width: 120px;
+    border: 2px solid darkgrey;
+    border-radius: 8px;
+    margin: 20px;
+    padding: 10px;
+}
