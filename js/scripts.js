@@ -10,6 +10,9 @@ let angle = getRandomAngle();
 let speedx = Math.cos(angle) * speed;
 let speedy = Math.sin(angle) * speed;
 let rafId;      
+let score = 0;
+
+//------------FONCTION------------------
 
 function getRandomAngle() {
     const deg = Math.random() * 120 + 30;
@@ -33,10 +36,15 @@ function drawRectangle(){
 function update() {
     y_ball -= speedy;
     x_ball -= speedx;
+
     if (x_ball > canvas.width -15 || x_ball < 15) {
         speedx = -speedx;
     }
     if (y_ball < 15) {
+        speedy = -speedy;
+    }
+    if (y_ball + 15 >= y_rect && y_ball + 15 <= y_rect + 20 && x_ball >= x_rect && x_ball <= x_rect + 100
+    ) {
         speedy = -speedy;
     }
     if(y_ball > canvas.height -15){
@@ -45,10 +53,11 @@ function update() {
 }
 
 function reset(){
-    x_ball = canvas.width /2;
-    y_ball = canvas.height -80;
-    x_rect = canvas.width /2 -50;
-    y_rect = canvas.height -60;
+    cancelAnimationFrame(rafId);
+    x_ball = canvas.width / 2;
+    y_ball = canvas.height - 80;
+    x_rect = canvas.width / 2 - 50;
+    y_rect = canvas.height - 60;
     speed = 0;
     speedx = 0;
     speedy = 0;
@@ -62,9 +71,24 @@ function loop() {
     rafId = requestAnimationFrame(loop);
 }
 
-
+//------------ INITIALISATION-----------------------------
 drawBall();
 drawRectangle();
 document.getElementById("go").addEventListener("click", function(){
+    speed = 2;
+    angle = getRandomAngle();
+    speedx = Math.cos(angle) * speed;
+    speedy = Math.sin(angle) * speed;
+    cancelAnimationFrame(rafId);
     loop();
+});
+
+document.addEventListener("keydown", (event) => {
+    const rectSpeed = 20;
+    if (event.key === "ArrowLeft" && x_rect > 9) {
+        x_rect -= rectSpeed;
+    }
+    if (event.key === "ArrowRight" && x_rect < canvas.width-100) {
+        x_rect += rectSpeed;
+    }
 });
