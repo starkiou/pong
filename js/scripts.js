@@ -5,11 +5,13 @@ let x_ball = canvas.width /2;
 let y_ball = canvas.height -80;
 let x_rect = canvas.width /2 -50;
 let y_rect = canvas.height -60;
-let speed = 2;
+const initialSpeed = 1;
+let speed = initialSpeed;
 let angle = getRandomAngle();
 let speedx = Math.cos(angle) * speed;
 let speedy = Math.sin(angle) * speed;
 let rafId;
+let gameStarted = false;
 let score = 0;
 let scoreIntervalId = null;
 
@@ -37,16 +39,34 @@ function drawRectangle(){
 function update() {
     y_ball -= speedy;
     x_ball -= speedx;
+    let augment = 1.1;
 
     if (x_ball > canvas.width -15 || x_ball < 15) {
         speedx = -speedx;
+        if (speed < initialSpeed * 5) {
+            speed += 0.2;
+            let augment = speed / (speed - 0.2);
+            speedx *= augment;
+            speedy *= augment;
+        }
     }
     if (y_ball < 15) {
         speedy = -speedy;
+        if (speed < initialSpeed * 5) {
+            speed += 0.2;
+            let augment = speed / (speed - 0.2);
+            speedx *= augment;
+            speedy *= augment;
+        }
     }
-    if (y_ball + 15 >= y_rect && y_ball + 15 <= y_rect + 20 && x_ball >= x_rect && x_ball <= x_rect + 100
-    ) {
+    if (y_ball + 15 >= y_rect && y_ball + 15 <= y_rect + 20 && x_ball >= x_rect && x_ball <= x_rect + 100) {
         speedy = -speedy;
+        if (speed < initialSpeed * 5) {
+            speed += 0.2;
+            let augment = speed / (speed - 0.2);
+            speedx *= augment;
+            speedy *= augment;
+        }
     }
     if(y_ball > canvas.height -15){
         reset();
@@ -67,9 +87,9 @@ function reset(){
     speedx = 0;
     speedy = 0;
     score = 0;
+    gameStarted = false;
     document.getElementById("score").textContent = score;
     document.getElementById("message").textContent = "Perdu ! Cliquez sur 'commencer la partie' pour rejouer.";
-
 }
 
 function loop() {
@@ -86,7 +106,8 @@ drawRectangle();
     document.getElementById("score").textContent = score;
 
 document.getElementById("go").addEventListener("click", function(){
-    speed = 2;
+    if (gameStarted) return;
+    speed = initialSpeed;
     angle = getRandomAngle();
     speedx = Math.cos(angle) * speed;
     speedy = Math.sin(angle) * speed;
@@ -101,10 +122,12 @@ document.getElementById("go").addEventListener("click", function(){
         score++;
         document.getElementById("score").textContent = score;
     }, 1000);
+    gameStarted = true;
     loop();
 });
 
 document.addEventListener("keydown", (event) => {
+    if (!gameStarted) return;
     const rectSpeed = 20;
     if (event.key === "ArrowLeft" && x_rect > 9) {
         x_rect -= rectSpeed;
