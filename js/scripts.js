@@ -9,8 +9,9 @@ let speed = 2;
 let angle = getRandomAngle();
 let speedx = Math.cos(angle) * speed;
 let speedy = Math.sin(angle) * speed;
-let rafId;      
+let rafId;
 let score = 0;
+let scoreIntervalId = null;
 
 //------------FONCTION------------------
 
@@ -54,6 +55,10 @@ function update() {
 
 function reset(){
     cancelAnimationFrame(rafId);
+    if (scoreIntervalId) {
+        clearInterval(scoreIntervalId);
+        scoreIntervalId = null;
+    }
     x_ball = canvas.width / 2;
     y_ball = canvas.height - 80;
     x_rect = canvas.width / 2 - 50;
@@ -61,6 +66,8 @@ function reset(){
     speed = 0;
     speedx = 0;
     speedy = 0;
+    score = 0;
+    document.getElementById("score").textContent = score;
 }
 
 function loop() {
@@ -74,12 +81,23 @@ function loop() {
 //------------ INITIALISATION-----------------------------
 drawBall();
 drawRectangle();
+    document.getElementById("score").textContent = score;
+
 document.getElementById("go").addEventListener("click", function(){
     speed = 2;
     angle = getRandomAngle();
     speedx = Math.cos(angle) * speed;
     speedy = Math.sin(angle) * speed;
     cancelAnimationFrame(rafId);
+    if (scoreIntervalId) {
+        clearInterval(scoreIntervalId);
+    }
+    score = 0;
+    document.getElementById("score").textContent = score;
+    scoreIntervalId = setInterval(() => {
+        score++;
+        document.getElementById("score").textContent = score;
+    }, 1000);
     loop();
 });
 
