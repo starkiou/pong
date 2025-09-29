@@ -18,7 +18,10 @@ let scoreIntervalId = null;
 //------------FONCTION------------------
 
 function getRandomAngle() {
-    const deg = Math.random() * 120 + 30;
+    let deg;
+    do {
+        deg = Math.random() * 120 + 30;
+    } while (Math.abs(deg - 90) < 15);
     return deg * (Math.PI / 180);
 }
 
@@ -79,6 +82,13 @@ function reset(){
         clearInterval(scoreIntervalId);
         scoreIntervalId = null;
     }
+    let bestScore = parseInt(localStorage.getItem("best-score") || "0");
+    if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem("best-score", bestScore);
+    }
+    document.getElementById("best-score").textContent = bestScore;
+
     x_ball = canvas.width / 2;
     y_ball = canvas.height - 80;
     x_rect = canvas.width / 2 - 50;
@@ -103,7 +113,8 @@ function loop() {
 //------------ INITIALISATION-----------------------------
 drawBall();
 drawRectangle();
-    document.getElementById("score").textContent = score;
+document.getElementById("score").textContent = score;
+document.getElementById("best-score").textContent = localStorage.getItem("best-score") || 0;
 
 document.getElementById("go").addEventListener("click", function(){
     if (gameStarted) return;
