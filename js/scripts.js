@@ -68,6 +68,8 @@ function reset(){
     speedy = 0;
     score = 0;
     document.getElementById("score").textContent = score;
+    document.getElementById("message").textContent = "Perdu ! Cliquez sur 'commencer la partie' pour rejouer.";
+
 }
 
 function loop() {
@@ -94,6 +96,7 @@ document.getElementById("go").addEventListener("click", function(){
     }
     score = 0;
     document.getElementById("score").textContent = score;
+    document.getElementById("message").textContent = "";
     scoreIntervalId = setInterval(() => {
         score++;
         document.getElementById("score").textContent = score;
