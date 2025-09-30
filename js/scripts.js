@@ -137,6 +137,8 @@ document.getElementById("go").addEventListener("click", function(){
     loop();
 });
 
+
+//------------ gestion raquette touches clavier------------------------------
 document.addEventListener("keydown", (event) => {
     if (!gameStarted) return;
     const rectSpeed = 20;
@@ -147,3 +149,5 @@ document.addEventListener("keydown", (event) => {
         x_rect += rectSpeed;
     }
 });
+
+//------------ gestion raquette tactiles -------------------------------------
