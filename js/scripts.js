@@ -15,6 +15,16 @@ let gameStarted = false;
 let score = 0;
 let scoreIntervalId = null;
 
+// État des touches et boutons
+let keysPressed = {
+    ArrowLeft: false,
+    ArrowRight: false
+};
+let buttonsPressed = {
+    left: false,
+    right: false
+};
+
 //------------FONCTION------------------
 
 function getRandomAngle() {
@@ -40,6 +50,17 @@ function drawRectangle(){
 }
 
 function update() {
+    // Gérer le mouvement de la raquette basé sur les touches/boutons appuyés
+    if (gameStarted) {
+        const rectSpeed = 2.5;
+        if ((keysPressed.ArrowLeft || buttonsPressed.left) && x_rect > 9) {
+            x_rect -= rectSpeed;
+        }
+        if ((keysPressed.ArrowRight || buttonsPressed.right) && x_rect < canvas.width - 100) {
+            x_rect += rectSpeed;
+        }
+    }
+
     y_ball -= speedy;
     x_ball -= speedx;
     let augment = 1.1;
@@ -141,13 +162,52 @@ document.getElementById("go").addEventListener("click", function(){
 //------------ gestion raquette touches clavier------------------------------
 document.addEventListener("keydown", (event) => {
     if (!gameStarted) return;
-    const rectSpeed = 20;
-    if (event.key === "ArrowLeft" && x_rect > 9) {
-        x_rect -= rectSpeed;
+    if (event.key === "ArrowLeft") {
+        keysPressed.ArrowLeft = true;
     }
-    if (event.key === "ArrowRight" && x_rect < canvas.width-100) {
-        x_rect += rectSpeed;
+    if (event.key === "ArrowRight") {
+        keysPressed.ArrowRight = true;
     }
 });
 
-//------------ gestion raquette tactiles -------------------------------------
+document.addEventListener("keyup", (event) => {
+    if (event.key === "ArrowLeft") {
+        keysPressed.ArrowLeft = false;
+    }
+    if (event.key === "ArrowRight") {
+        keysPressed.ArrowRight = false;
+    }
+});
+
+//------------ gestion raquette tactiles et souris-----------------------------
+document.getElementById("left-btn").addEventListener("mousedown", () => {
+    buttonsPressed.left = true;
+});
+
+document.getElementById("left-btn").addEventListener("mouseup", () => {
+    buttonsPressed.left = false;
+});
+
+document.getElementById("left-btn").addEventListener("touchstart", () => {
+    buttonsPressed.left = true;
+});
+
+document.getElementById("left-btn").addEventListener("touchend", () => {
+    buttonsPressed.left = false;
+});
+
+document.getElementById("right-btn").addEventListener("mousedown", () => {
+    buttonsPressed.right = true;
+});
+
+document.getElementById("right-btn").addEventListener("mouseup", () => {
+    buttonsPressed.right = false;
+});
+
+document.getElementById("right-btn").addEventListener("touchstart", () => {
+    buttonsPressed.right = true;
+});
+
+document.getElementById("right-btn").addEventListener("touchend", () => {
+    buttonsPressed.right = false;
+});
