@@ -1,19 +1,28 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
+// Dimensions en pixels, vitesses en pixels par seconde
+const BALL_RADIUS = 15;
+const PADDLE_WIDTH = 100;
+const PADDLE_HEIGHT = 20;
+const PADDLE_SPEED = 150;
+const INITIAL_SPEED = 60;
+const SPEED_STEP = 12;
+const MAX_SPEED = INITIAL_SPEED * 5;
+// Borne le delta time pour éviter un saut de la balle au retour sur l'onglet
+const MAX_DT = 0.05;
+
 let x_ball = canvas.width /2;
 let y_ball = canvas.height -80;
-let x_rect = canvas.width /2 -50;
+let x_rect = canvas.width /2 - PADDLE_WIDTH /2;
 let y_rect = canvas.height -60;
-const initialSpeed = 1;
-let speed = initialSpeed;
-let angle = getRandomAngle();
-let speedx = Math.cos(angle) * speed;
-let speedy = Math.sin(angle) * speed;
-let rafId;
+let speed = INITIAL_SPEED;
+let speedx = 0;
+let speedy = 0;
 let gameStarted = false;
 let score = 0;
-let scoreIntervalId = null;
+let elapsed = 0;
+let lastTime = 0;
 
 // État des touches et boutons
 let keysPressed = {
@@ -38,71 +47,79 @@ function getRandomAngle() {
 function drawBall() {
     ctx.fillStyle = "blue";
     ctx.beginPath();
-    ctx.arc(x_ball, y_ball, 15, 0, Math.PI * 2);
+    ctx.arc(x_ball, y_ball, BALL_RADIUS, 0, Math.PI * 2);
     ctx.fill();
 }
 
 function drawRectangle(){
     ctx.fillStyle = "black";
     ctx.beginPath();
-    ctx.rect(x_rect, y_rect, 100, 20,);
+    ctx.rect(x_rect, y_rect, PADDLE_WIDTH, PADDLE_HEIGHT);
     ctx.fill();
 }
 
-function update() {
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBall();
+    drawRectangle();
+}
+
+function accelerate() {
+    if (speed >= MAX_SPEED) return;
+    const factor = (speed + SPEED_STEP) / speed;
+    speed += SPEED_STEP;
+    speedx *= factor;
+    speedy *= factor;
+}
+
+function bounceX() {
+    speedx = -speedx;
+    accelerate();
+}
+
+function bounceY() {
+    speedy = -speedy;
+    accelerate();
+}
+
+function update(dt) {
     // Gérer le mouvement de la raquette basé sur les touches/boutons appuyés
-    if (gameStarted) {
-        const rectSpeed = 2.5;
-        if ((keysPressed.ArrowLeft || buttonsPressed.left) && x_rect > 9) {
-            x_rect -= rectSpeed;
-        }
-        if ((keysPressed.ArrowRight || buttonsPressed.right) && x_rect < canvas.width - 100) {
-            x_rect += rectSpeed;
-        }
+    if (keysPressed.ArrowLeft || buttonsPressed.left) {
+        x_rect = Math.max(0, x_rect - PADDLE_SPEED * dt);
+    }
+    if (keysPressed.ArrowRight || buttonsPressed.right) {
+        x_rect = Math.min(canvas.width - PADDLE_WIDTH, x_rect + PADDLE_SPEED * dt);
     }
 
-    y_ball -= speedy;
-    x_ball -= speedx;
-    let augment = 1.1;
+    y_ball -= speedy * dt;
+    x_ball -= speedx * dt;
 
-    if (x_ball > canvas.width -15 || x_ball < 15) {
-        speedx = -speedx;
-        if (speed < initialSpeed * 5) {
-            speed += 0.2;
-            let augment = speed / (speed - 0.2);
-            speedx *= augment;
-            speedy *= augment;
-        }
+    // Chaque rebond teste le sens de la balle pour ne pas rebondir deux fois de suite
+    const goingRight = speedx < 0;
+    const goingDown = speedy < 0;
+
+    if ((x_ball > canvas.width - BALL_RADIUS && goingRight) || (x_ball < BALL_RADIUS && !goingRight)) {
+        bounceX();
     }
-    if (y_ball < 15) {
-        speedy = -speedy;
-        if (speed < initialSpeed * 5) {
-            speed += 0.2;
-            let augment = speed / (speed - 0.2);
-            speedx *= augment;
-            speedy *= augment;
-        }
+    if (y_ball < BALL_RADIUS && !goingDown) {
+        bounceY();
     }
-    if (y_ball + 15 >= y_rect && y_ball + 15 <= y_rect + 20 && x_ball >= x_rect && x_ball <= x_rect + 100) {
-        speedy = -speedy;
-        if (speed < initialSpeed * 5) {
-            speed += 0.2;
-            let augment = speed / (speed - 0.2);
-            speedx *= augment;
-            speedy *= augment;
-        }
+    if (goingDown && y_ball + BALL_RADIUS >= y_rect && y_ball + BALL_RADIUS <= y_rect + PADDLE_HEIGHT && x_ball >= x_rect && x_ball <= x_rect + PADDLE_WIDTH) {
+        bounceY();
     }
-    if(y_ball > canvas.height -15){
+    if (y_ball > canvas.height - BALL_RADIUS) {
         reset();
+        return;
+    }
+
+    elapsed += dt;
+    if (Math.floor(elapsed) !== score) {
+        score = Math.floor(elapsed);
+        document.getElementById("score").textContent = score;
     }
 }
 
 function reset(){
-    cancelAnimationFrame(rafId);
-    if (scoreIntervalId) {
-        clearInterval(scoreIntervalId);
-        scoreIntervalId = null;
-    }
     let bestScore = parseInt(localStorage.getItem("best-score") || "0");
     if (score > bestScore) {
         bestScore = score;
@@ -112,50 +129,46 @@ function reset(){
 
     x_ball = canvas.width / 2;
     y_ball = canvas.height - 80;
-    x_rect = canvas.width / 2 - 50;
+    x_rect = canvas.width / 2 - PADDLE_WIDTH / 2;
     y_rect = canvas.height - 60;
-    speed = 0;
     speedx = 0;
     speedy = 0;
     score = 0;
+    elapsed = 0;
     gameStarted = false;
     document.getElementById("score").textContent = score;
     document.getElementById("message").textContent = "Perdu ! Cliquez sur 'commencer la partie' pour rejouer.";
 }
 
-function loop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBall();
-    drawRectangle();
-    update();
-    rafId = requestAnimationFrame(loop);
+function loop(time) {
+    const dt = Math.min(Math.max(time - lastTime, 0) / 1000, MAX_DT);
+    lastTime = time;
+    update(dt);
+    draw();
+    // Après un game over, plus aucune frame n'est programmée
+    if (gameStarted) {
+        requestAnimationFrame(loop);
+    }
 }
 
 //------------ INITIALISATION-----------------------------
-drawBall();
-drawRectangle();
+draw();
 document.getElementById("score").textContent = score;
 document.getElementById("best-score").textContent = localStorage.getItem("best-score") || 0;
 
 document.getElementById("go").addEventListener("click", function(){
     if (gameStarted) return;
-    speed = initialSpeed;
-    angle = getRandomAngle();
+    speed = INITIAL_SPEED;
+    const angle = getRandomAngle();
     speedx = Math.cos(angle) * speed;
     speedy = Math.sin(angle) * speed;
-    cancelAnimationFrame(rafId);
-    if (scoreIntervalId) {
-        clearInterval(scoreIntervalId);
-    }
     score = 0;
+    elapsed = 0;
     document.getElementById("score").textContent = score;
     document.getElementById("message").textContent = "";
-    scoreIntervalId = setInterval(() => {
-        score++;
-        document.getElementById("score").textContent = score;
-    }, 1000);
     gameStarted = true;
-    loop();
+    lastTime = performance.now();
+    requestAnimationFrame(loop);
 });
 
 
@@ -180,34 +193,20 @@ document.addEventListener("keyup", (event) => {
 });
 
 //------------ gestion raquette tactiles et souris-----------------------------
-document.getElementById("left-btn").addEventListener("mousedown", () => {
-    buttonsPressed.left = true;
-});
+function bindButton(id, side) {
+    const button = document.getElementById(id);
+    // mouseleave et touchcancel évitent un bouton qui reste enfoncé
+    ["mousedown", "touchstart"].forEach((type) => {
+        button.addEventListener(type, () => {
+            buttonsPressed[side] = true;
+        });
+    });
+    ["mouseup", "mouseleave", "touchend", "touchcancel"].forEach((type) => {
+        button.addEventListener(type, () => {
+            buttonsPressed[side] = false;
+        });
+    });
+}
 
-document.getElementById("left-btn").addEventListener("mouseup", () => {
-    buttonsPressed.left = false;
-});
-
-document.getElementById("left-btn").addEventListener("touchstart", () => {
-    buttonsPressed.left = true;
-});
-
-document.getElementById("left-btn").addEventListener("touchend", () => {
-    buttonsPressed.left = false;
-});
-
-document.getElementById("right-btn").addEventListener("mousedown", () => {
-    buttonsPressed.right = true;
-});
-
-document.getElementById("right-btn").addEventListener("mouseup", () => {
-    buttonsPressed.right = false;
-});
-
-document.getElementById("right-btn").addEventListener("touchstart", () => {
-    buttonsPressed.right = true;
-});
-
-document.getElementById("right-btn").addEventListener("touchend", () => {
-    buttonsPressed.right = false;
-});
+bindButton("left-btn", "left");
+bindButton("right-btn", "right");

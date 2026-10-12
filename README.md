@@ -1,6 +1,8 @@
 # 🎮 Pong
 
-Un jeu Pong classique développé en HTML5, CSS et JavaScript vanilla. Contrôlez la raquette pour garder la balle en jeu et battez vos meilleurs scores !
+**[▶️ Jouer en ligne](https://starkiou.github.io/pong/)**
+
+Un Pong en solo, façon squash, développé en HTML5, CSS et JavaScript vanilla : une raquette, trois murs, et une balle qui accélère à chaque rebond. Le score est le temps tenu avant de la laisser passer.
 
 ## ✨ Fonctionnalités
 
@@ -56,6 +58,13 @@ Aucune installation requise ! Il suffit de :
 - **HTML5** : Structure et canvas pour le rendu du jeu
 - **CSS3** : Design responsive et moderne
 - **JavaScript Vanilla** : Logique du jeu sans dépendances
+
+## 🧠 Ce que j'ai appris
+
+- **Delta time** : les vitesses sont exprimées en pixels par seconde et multipliées par le temps écoulé entre deux frames, pour que le jeu aille à la même vitesse sur un écran 60 Hz ou 144 Hz.
+- **Boucle de jeu** : une seule boucle `requestAnimationFrame` met à jour, dessine et compte le score, et elle s'arrête réellement au game over.
+- **Entrées** : l'état des touches est gardé dans une table lue à chaque frame, plutôt que de dépendre de la répétition automatique du clavier.
+- **Collisions** : un rebond ne compte que si la balle se dirige vers l'obstacle, ce qui évite les doubles rebonds sur la raquette.
 
 ## 💾 Sauvegarde
 
