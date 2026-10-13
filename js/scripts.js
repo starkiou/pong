@@ -5,9 +5,11 @@ const ctx = canvas.getContext("2d");
 const BALL_RADIUS = 15;
 const PADDLE_WIDTH = 100;
 const PADDLE_HEIGHT = 20;
-const PADDLE_SPEED = 150;
-const INITIAL_SPEED = 60;
-const SPEED_STEP = 12;
+// Réglées sur le rythme d'origine du jeu, écrit sur un écran 240 Hz où chaque
+// image déplaçait la balle d'un pixel
+const PADDLE_SPEED = 600;
+const INITIAL_SPEED = 240;
+const SPEED_STEP = 48;
 const MAX_SPEED = INITIAL_SPEED * 5;
 // Borne le delta time pour éviter un saut de la balle au retour sur l'onglet
 const MAX_DT = 0.05;
@@ -91,6 +93,7 @@ function update(dt) {
         x_rect = Math.min(canvas.width - PADDLE_WIDTH, x_rect + PADDLE_SPEED * dt);
     }
 
+    const previousBottom = y_ball + BALL_RADIUS;
     y_ball -= speedy * dt;
     x_ball -= speedx * dt;
 
@@ -104,7 +107,10 @@ function update(dt) {
     if (y_ball < BALL_RADIUS && !goingDown) {
         bounceY();
     }
-    if (goingDown && y_ball + BALL_RADIUS >= y_rect && y_ball + BALL_RADIUS <= y_rect + PADDLE_HEIGHT && x_ball >= x_rect && x_ball <= x_rect + PADDLE_WIDTH) {
+    // On teste le trajet parcouru pendant l'image, pas seulement la position d'arrivée :
+    // à grande vitesse, la balle peut franchir toute l'épaisseur de la raquette d'un coup
+    const crossedPaddle = previousBottom <= y_rect + PADDLE_HEIGHT && y_ball + BALL_RADIUS >= y_rect;
+    if (goingDown && crossedPaddle && x_ball >= x_rect && x_ball <= x_rect + PADDLE_WIDTH) {
         bounceY();
     }
     if (y_ball > canvas.height - BALL_RADIUS) {
