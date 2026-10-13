@@ -2,6 +2,8 @@
 
 **[▶️ Jouer en ligne](https://starkiou.github.io/pong/)**
 
+![Une partie de Pong](docs/partie.gif)
+
 Un Pong en solo, façon squash, développé en HTML5, CSS et JavaScript vanilla : une raquette, trois murs, et une balle qui accélère à chaque rebond. Le score est le temps tenu avant de la laisser passer.
 
 ## ✨ Fonctionnalités
